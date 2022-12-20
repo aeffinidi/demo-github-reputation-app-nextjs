@@ -3,7 +3,9 @@ import { FC } from "react";
 
 import styles from "../styles/Home.module.css";
 
-const redirectUrl = `${process.env.HOST || "http://localhost:3000"}/github`;
+const redirectUrl = `${
+  process.env.NEXT_PUBLIC_HOST || "http://localhost:3000"
+}/github`;
 
 const Home: FC = () => {
   const handleLoginWithGithub = () => {
