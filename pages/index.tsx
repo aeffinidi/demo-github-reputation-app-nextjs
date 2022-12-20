@@ -26,6 +26,7 @@ const Home: FC = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
+        <h1>Connect with your github account</h1>
         <button onClick={handleLoginWithGithub}>Login with github</button>
       </main>
     </>
