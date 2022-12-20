@@ -7,6 +7,9 @@ const redirectUrl = `${
   process.env.NEXT_PUBLIC_HOST || "http://localhost:3000"
 }/github`;
 
+// TODO: remove this line
+console.log("redirectUrl:", redirectUrl);
+
 const Home: FC = () => {
   const handleLoginWithGithub = () => {
     if (!process.env.NEXT_PUBLIC_GITHUB_APP_CLIENT_ID) {
