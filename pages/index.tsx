@@ -3,13 +3,6 @@ import { FC } from "react";
 
 import styles from "../styles/Home.module.css";
 
-const redirectUrl = `${
-  process.env.NEXT_PUBLIC_HOST || "http://localhost:3000"
-}/github`;
-
-// TODO: remove this line
-console.log("redirectUrl:", redirectUrl);
-
 const Home: FC = () => {
   const handleLoginWithGithub = () => {
     if (!process.env.NEXT_PUBLIC_GITHUB_APP_CLIENT_ID) {
@@ -18,7 +11,7 @@ const Home: FC = () => {
     }
 
     window.location.assign(
-      `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_APP_CLIENT_ID}&redirect_uri=${redirectUrl}`
+      `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_APP_CLIENT_ID}`
     );
   };
 
