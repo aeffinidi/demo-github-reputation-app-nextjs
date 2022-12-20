@@ -11,6 +11,7 @@ const Github: FC<GithubProps> = (props) => {
   const { token } = props;
   const [storedToken] = useLocalStorage<string>("github_token", token);
   const [user, setUser] = useState<GithubUser>();
+  const [repos, setRepos] = useState([]);
 
   const handleGetUserData = async () => {
     const resp = await fetch(
@@ -18,6 +19,14 @@ const Github: FC<GithubProps> = (props) => {
     );
     const user: GithubUser = await resp.json();
     setUser(user);
+  };
+
+  const handleGetUserRepos = async () => {
+    const resp = await fetch(
+      `${process.env.NEXT_PUBLIC_HOST}/api/github/repos?access_token=${storedToken}`
+    );
+    const data = await resp.json();
+    setRepos(data.repos);
   };
 
   return (
@@ -29,6 +38,12 @@ const Github: FC<GithubProps> = (props) => {
       {user && (
         <p>
           <pre>{JSON.stringify(user, undefined, 2)}</pre>
+        </p>
+      )}
+      <button onClick={handleGetUserRepos}>Get User Repos</button>
+      {repos && (
+        <p>
+          <pre>{JSON.stringify(repos, undefined, 2)}</pre>
         </p>
       )}
     </main>
