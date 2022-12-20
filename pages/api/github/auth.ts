@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { request } from "@octokit/request";
 
-import { authWithCode } from "../../connectors/github";
+import { authWithCode } from "../../../connectors/github";
 
 type Data = {
   name?: string;

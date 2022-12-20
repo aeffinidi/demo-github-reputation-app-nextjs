@@ -2,8 +2,8 @@ import { GetServerSideProps } from "next";
 import { FC, useState } from "react";
 
 import { GithubTokenResponse } from "./api/github/token";
-import { useLocalStorage } from "./hooks/useLocalStorage";
-import { GithubUser } from "./types/github";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import { GithubUser } from "../types/github";
 
 type GithubProps = GithubTokenResponse;
 

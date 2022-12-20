@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { GithubUser } from "../../types/github";
+import { GithubUser } from "../../../types/github";
 
 type Data = {
   user?: GithubUser;
