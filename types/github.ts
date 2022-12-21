@@ -161,3 +161,5 @@ export type GithubRepo = {
       }
     | undefined;
 };
+
+export type GithubReposLanguages = {};

@@ -11,7 +11,7 @@ const Github: FC<GithubProps> = (props) => {
   const { token } = props;
   const [storedToken] = useLocalStorage<string>("github_token", token);
   const [user, setUser] = useState<GithubUser>();
-  const [repos, setRepos] = useState([]);
+  const [repos, setRepos] = useState(null);
 
   const handleGetUserData = async () => {
     const resp = await fetch(
@@ -53,6 +53,12 @@ const Github: FC<GithubProps> = (props) => {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { query } = context;
   const code = query["code"];
+  if (!code) {
+    return {
+      props: {},
+    };
+  }
+
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_HOST}/api/github/token?code=${code}`
   );
