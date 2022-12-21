@@ -65,6 +65,8 @@ function getBase(host: string): string {
     case "ui.schema.dev.affinidi.com":
     case "schema-manager.dev.affinity-project.org":
       return "https://schema-manager.dev.affinity-project.org";
+    case "affinidi-schema-manager.staging.affinity-project.org":
+      return "https://affinidi-schema-manager.staging.affinity-project.org";
     case "ui.schema.stg.affinidi.com":
     case "schema.stg.affinidi.com":
       return "https://schema.stg.affinidi.com";
@@ -100,6 +102,23 @@ export function parseSchemaURL(schemaURL: string): {
     );
   }
 }
+
+type Schema = {
+  id: string;
+  parentId: string;
+  authorDid: string;
+  description: string;
+  createdAt: string;
+  namespace: string;
+  type: string;
+  version: number;
+  revision: number;
+  jsonSchemaUrl: string;
+  jsonLdContextUrl: string;
+};
+
+export const SCHEMA_MANAGER_URL =
+  "https://affinidi-schema-manager.staging.affinity-project.org/api/v1";
 
 const getSchema = async (name: string): Promise<Schema> => {
   const resp = await fetch(`${SCHEMA_MANAGER_URL}/schemas/${name}`);

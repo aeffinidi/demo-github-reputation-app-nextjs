@@ -9,9 +9,10 @@ import {
 class IssuanceService {
   constructor(
     private readonly client = new IssuanceAPI({
-      baseUrl: `${process.env.REACT_APP_ISSUANCE_URL}/api/v1`,
-      baseApiParams: {
-        credentials: "include",
+      baseURL: `${process.env.AFFINIDI_ISSUANCE_URL}/api/v1`,
+      withCredentials: true,
+      headers: {
+        "Accept-Encoding": "application/json",
       },
     })
   ) {}
