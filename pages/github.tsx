@@ -5,6 +5,9 @@ import { GithubTokenResponse } from "./api/github/token";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { GithubUser } from "../types/github";
 
+import styles from "../styles/Home.module.css";
+import Link from "next/link";
+
 type GithubProps = GithubTokenResponse;
 
 const Github: FC<GithubProps> = (props) => {
@@ -38,10 +41,12 @@ const Github: FC<GithubProps> = (props) => {
   };
 
   return (
-    <main>
-      <h1>Siple github page</h1>
-      <h2>Token</h2>
-      <pre>{storedToken || token}</pre>
+    <main className={styles.main}>
+      <h1>Fetch your data from Github</h1>
+      <div>
+        <h2>Access Token</h2>
+        <pre>{storedToken || token}</pre>
+      </div>
       <button onClick={handleGetUserData}>Get User Data</button>
       {user && (
         <p>
@@ -62,6 +67,8 @@ const Github: FC<GithubProps> = (props) => {
           <pre>{JSON.stringify(languages, undefined, 2)}</pre>
         </p>
       )}
+      <h1>Or issue your data developer VC</h1>
+      <Link href="/issue-vc">To VS Issuer form</Link>
     </main>
   );
 };
