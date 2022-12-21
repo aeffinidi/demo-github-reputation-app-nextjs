@@ -12,6 +12,7 @@ const Github: FC<GithubProps> = (props) => {
   const [storedToken] = useLocalStorage<string>("github_token", token);
   const [user, setUser] = useState<GithubUser>();
   const [repos, setRepos] = useState(null);
+  const [languages, setLanguages] = useState(null);
 
   const handleGetUserData = async () => {
     const resp = await fetch(
@@ -27,6 +28,13 @@ const Github: FC<GithubProps> = (props) => {
     );
     const data = await resp.json();
     setRepos(data.repos);
+  };
+  const handleGetUserReposLanguages = async () => {
+    const resp = await fetch(
+      `${process.env.NEXT_PUBLIC_HOST}/api/github/reposLanguages?access_token=${storedToken}`
+    );
+    const data = await resp.json();
+    setLanguages(data.languages);
   };
 
   return (
@@ -44,6 +52,14 @@ const Github: FC<GithubProps> = (props) => {
       {repos && (
         <p>
           <pre>{JSON.stringify(repos, undefined, 2)}</pre>
+        </p>
+      )}
+      <button onClick={handleGetUserReposLanguages}>
+        Get User&apos;s programming languages
+      </button>
+      {languages && (
+        <p>
+          <pre>{JSON.stringify(languages, undefined, 2)}</pre>
         </p>
       )}
     </main>
