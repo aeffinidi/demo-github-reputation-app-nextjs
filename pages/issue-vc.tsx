@@ -50,7 +50,7 @@ const IssueVC: FC<IssueVCProps> = (props) => {
 
   return (
     <main className="text-gray-600 body-font">
-      <div className="container flex flex-col justify-center items-center h-[50vh]">
+      <div className="flex flex-col justify-center items-center h-[50vh]">
         <h1 className="sm:text-3xl text-2xl font-medium title-font text-gray-900 mb-4">
           Issue Your Developer VC
         </h1>
