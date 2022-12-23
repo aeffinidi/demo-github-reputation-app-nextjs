@@ -1,5 +1,6 @@
 import { Octokit } from "@octokit/rest";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getSession } from "next-auth/react";
 
 import GithubService from "../../../services/github";
 import { GithubRepo } from "../../../types/github";
@@ -13,13 +14,11 @@ const handler = async (
   req: NextApiRequest,
   res: NextApiResponse<GithubReposResponse>
 ) => {
-  let { access_token: auth } = req.query;
-  if (!auth || typeof auth !== "string") {
-    res.status(404).json({ error: "No token" });
-    return;
-  }
+  const session = await getSession({ req });
 
-  const repos = await GithubService.getUserRepos(new Octokit({ auth }));
+  const repos = await GithubService.getUserRepos(
+    new Octokit({ auth: session?.accessToken })
+  );
 
   res.status(200).json({ repos });
 };

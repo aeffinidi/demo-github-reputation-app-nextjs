@@ -1,5 +1,6 @@
 import { Octokit } from "@octokit/rest";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getSession } from "next-auth/react";
 
 import GithubService from "../../../services/github";
 import { GithubReposLanguages } from "../../../types/github";
@@ -13,14 +14,10 @@ const handler = async (
   req: NextApiRequest,
   res: NextApiResponse<GithubReposLanguagesResponse>
 ) => {
-  let { access_token: auth } = req.query;
-  if (!auth || typeof auth !== "string") {
-    res.status(404).json({ error: "No token" });
-    return;
-  }
+  const session = await getSession({ req });
 
   const languages = await GithubService.getUserProgrammingLanguages(
-    new Octokit({ auth })
+    new Octokit({ auth: session?.accessToken })
   );
 
   res.status(200).json({ languages });

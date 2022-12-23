@@ -1,21 +1,37 @@
 import { GetServerSideProps } from "next";
-import { FC, useState } from "react";
+import { Session } from "next-auth";
 import Link from "next/link";
+import { unstable_getServerSession } from "next-auth/next";
+import { FC, useState } from "react";
 import { RiBracesFill, RiUser5Line } from "react-icons/ri";
+import { getSession, signOut, useSession } from "next-auth/react";
+import Image from "next/image";
+import { useRouter } from "next/router";
 
-import { GithubTokenResponse } from "./api/github/token";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { GithubUser } from "../types/github";
 import GitIcon from "../components/icons/GitIcon";
+import { authOptions } from "../pages/api/auth/[...nextauth]";
 
-type GithubProps = GithubTokenResponse;
+type GithubProps = {
+  session: Session;
+};
 
 const Github: FC<GithubProps> = (props) => {
-  const { token } = props;
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const token = "";
   const [storedToken] = useLocalStorage<string>("github_token", token);
-  const [user, setUser] = useState<GithubUser | null>(null);
+  const [githubUser, setGithubUser] = useState<GithubUser | null>(null);
   const [repos, setRepos] = useState(null);
   const [languages, setLanguages] = useState(null);
+
+  // if (!data) {
+  //   router.replace("/");
+  // }
+  // console.log("data:", data);
+
+  // console.log("user:", user);
 
   const handleGetUserData = async () => {
     const resp = await fetch(
@@ -24,7 +40,7 @@ const Github: FC<GithubProps> = (props) => {
     const user: GithubUser = await resp.json();
     setRepos(() => null);
     setLanguages(() => null);
-    setUser(() => user);
+    setGithubUser(() => user);
   };
 
   const handleGetUserRepos = async () => {
@@ -32,7 +48,7 @@ const Github: FC<GithubProps> = (props) => {
       `${process.env.NEXT_PUBLIC_HOST}/api/github/repos?access_token=${storedToken}`
     );
     const data = await resp.json();
-    setUser(() => null);
+    setGithubUser(() => null);
     setLanguages(() => null);
     setRepos(data.repos);
   };
@@ -42,14 +58,40 @@ const Github: FC<GithubProps> = (props) => {
     );
     const data = await resp.json();
     setRepos(() => null);
-    setUser(() => null);
+    setGithubUser(() => null);
     setLanguages(data.languages);
   };
+
+  const handleSignout = async () => {
+    await signOut({ redirect: false });
+    return router.push("/");
+  };
+
+  if (status === "loading") {
+    return null;
+  }
+  if (status === "unauthenticated" || !session) {
+    return router.replace("/");
+  }
+
+  const { user } = session;
 
   return (
     <main className="text-gray-600 body-font">
       <div className="container px-5 py-24 mx-auto">
         <div className="text-center mb-20">
+          <div className="flex flex-col items-center gap-6">
+            <h1 className="sm:text-3xl text-2xl font-medium title-font text-gray-900 mb-4">
+              Welcome <span className="italic">{user.name}</span>
+            </h1>
+            <img
+              src={user.image}
+              className="object-cover"
+              // height={64}
+              // width={64}
+              alt={user.name}
+            />
+          </div>
           <h1 className="sm:text-3xl text-2xl font-medium title-font text-gray-900 mb-4">
             Fetch your data from Github
           </h1>
@@ -57,6 +99,7 @@ const Github: FC<GithubProps> = (props) => {
             Access Token
           </p>
           <pre>{storedToken || token}</pre>
+          <button onClick={handleSignout}> Sign-out </button>
           <div className="flex mt-6 justify-center">
             <div className="w-16 h-1 rounded-full bg-indigo-500 inline-flex"></div>
           </div>
@@ -140,25 +183,6 @@ const Github: FC<GithubProps> = (props) => {
       </div>
     </main>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { query } = context;
-  const code = query["code"];
-  if (!code) {
-    return {
-      props: {},
-    };
-  }
-
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_HOST}/api/github/token?code=${code}`
-  );
-  const data: GithubTokenResponse = await res.json();
-
-  return {
-    props: { token: data.token || null }, // will be passed to the page component as props
-  };
 };
 
 export default Github;

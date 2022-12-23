@@ -1,16 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import EmailValidator from "email-validator";
-
-import {
-  parseSchemaURL,
-  SCHEMA_MANAGER_URL,
-} from "../../../helpers/schema-helpers";
-import { issuanceService } from "../../../services/issuance";
 import { Octokit } from "@octokit/rest";
-import { GithubRepo } from "../../../types/github";
-import GithubService from "../../../services/github";
 
-const SCHEMA_NAME = "DeveloperReputationV1-1";
+import { issuanceService } from "../../../services/issuance";
+import GithubService from "../../../services/github";
+import { getSession } from "next-auth/react";
+
+const SCHEMA_NAME = "DeveloperReputationV1-2";
 
 type AnyObject = Record<string, any>;
 
@@ -55,11 +51,14 @@ const handler = async (
     return;
   }
 
-  const { email, accessToken } = req.body;
-  if (!accessToken) {
+  const session = await getSession({ req });
+  if (!session || session.accessToken) {
     res.status(400).json({ error: "No access token" });
     return;
   }
+  const kit = new Octokit({ auth: session.accessToken });
+
+  const { email } = req.body;
   if (typeof email !== "string") {
     res.status(400).json({ error: "No email" });
     return;
@@ -69,7 +68,6 @@ const handler = async (
     res.status(400).json({ error: "Invalid email input" });
   }
 
-  const kit = new Octokit({ auth: accessToken });
   const user = await GithubService.getUserData(kit);
   const repos = await GithubService.getUserRepos(kit);
   const languages = await GithubService.getUserProgrammingLanguages(kit);
@@ -86,7 +84,7 @@ const handler = async (
           method: VerificationMethod.Email,
         },
         schema: {
-          type: "DeveloperReputationV1-2",
+          type: SCHEMA_NAME,
           jsonLdContextUrl:
             "https://schema.stg.affinidi.com/DeveloperReputationV1-2.jsonld",
           jsonSchemaUrl:
