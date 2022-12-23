@@ -8,6 +8,7 @@ import {
 import { issuanceService } from "../../../services/issuance";
 import { Octokit } from "@octokit/rest";
 import { GithubRepo } from "../../../types/github";
+import GithubService from "../../../services/github";
 
 const SCHEMA_NAME = "DeveloperReputationV1-1";
 
@@ -68,30 +69,10 @@ const handler = async (
     res.status(400).json({ error: "Invalid email input" });
   }
 
-  const kit = new Octokit({
-    auth: accessToken,
-  });
-
-  const userData = await kit.rest.users.getAuthenticated();
-  const user = userData.data;
-  const owner = user.login;
-  const reposData = await kit.repos.listForAuthenticatedUser();
-  const repos = reposData.data;
-  const languages = Array.from(
-    (
-      await Promise.all(
-        repos.map(async (repo: GithubRepo) => {
-          const r = await kit.repos.listLanguages({ owner, repo: repo.name });
-          return Object.keys(r.data);
-        })
-      )
-    )
-      .flat()
-      .reduce((acc, curr) => {
-        acc.add(curr);
-        return acc;
-      }, new Set<string>())
-  );
+  const kit = new Octokit({ auth: accessToken });
+  const user = await GithubService.getUserData(kit);
+  const repos = await GithubService.getUserRepos(kit);
+  const languages = await GithubService.getUserProgrammingLanguages(kit);
 
   try {
     const issuerDid = process.env.AFFINIDI_PROJECT_DID || "";
