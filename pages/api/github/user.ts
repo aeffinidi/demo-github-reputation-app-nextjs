@@ -1,3 +1,4 @@
+import { Octokit } from "@octokit/rest";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { GithubUser } from "../../../types/github";
@@ -8,23 +9,24 @@ type Data = {
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
-  let { access_token: token } = req.query;
-  if (!token || typeof token !== "string") {
+  let { access_token: auth } = req.query;
+  if (!auth || typeof auth !== "string") {
     res.status(404).json({ error: "No token" });
     return;
   }
 
-  if (token.indexOf("Bearer") === -1) {
-    token = `Bearer ${token}`;
+  if (auth.indexOf("Bearer") === -1) {
+    auth = `Bearer ${auth}`;
   }
 
   const resp = await fetch("https://api.github.com/user", {
     method: "GET",
     headers: {
-      Authorization: token,
+      Authorization: auth,
     },
   });
   const user: GithubUser = await resp.json();
+
   res.json({ user });
 };
 

@@ -65,8 +65,6 @@ function getBase(host: string): string {
     case "ui.schema.dev.affinidi.com":
     case "schema-manager.dev.affinity-project.org":
       return "https://schema-manager.dev.affinity-project.org";
-    case "affinidi-schema-manager.staging.affinity-project.org":
-      return "https://affinidi-schema-manager.staging.affinity-project.org";
     case "ui.schema.stg.affinidi.com":
     case "schema.stg.affinidi.com":
       return "https://schema.stg.affinidi.com";
@@ -96,7 +94,7 @@ export function parseSchemaURL(schemaURL: string): {
       jsonLdContext: new URL(`${base}/${fullSchemaType}.jsonld`),
       jsonSchema: new URL(`${base}/${fullSchemaType}.json`),
     };
-  } catch (_) {
+  } catch (error) {
     throw new Error(
       "Could not parse schema URL, please provide a valid schema URl"
     );
@@ -117,10 +115,9 @@ type Schema = {
   jsonLdContextUrl: string;
 };
 
-export const SCHEMA_MANAGER_URL =
-  "https://affinidi-schema-manager.staging.affinity-project.org/api/v1";
+export const SCHEMA_MANAGER_URL = "https://schema.stg.affinidi.com";
 
-const getSchema = async (name: string): Promise<Schema> => {
-  const resp = await fetch(`${SCHEMA_MANAGER_URL}/schemas/${name}`);
-  return resp.json();
-};
+// const getSchema = async (name: string): Promise<Schema> => {
+//   const resp = await fetch(`${SCHEMA_MANAGER_URL}/schemas/${name}`);
+//   return resp.json();
+// };

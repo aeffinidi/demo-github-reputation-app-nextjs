@@ -46,6 +46,7 @@ class IssuanceService {
       );
       return resp.data;
     } catch (error: any) {
+      console.log("createOffer error:", error);
       throw new Error(error?.error?.message);
     }
   };

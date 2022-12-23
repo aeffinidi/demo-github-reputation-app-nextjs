@@ -22,14 +22,19 @@ const handler = async (
     auth,
   });
 
-  const owner = "aeffinidi";
-  const names = ["advent-of-code-2022", "demo-github-reputation-app-nextjs"];
+  const userData = await kit.rest.users.getAuthenticated();
+  const user = userData.data;
+  const reposData = await kit.repos.listForAuthenticatedUser();
+  const repos = reposData.data;
 
   const languages = Array.from(
     (
       await Promise.all(
-        names.map(async (n) => {
-          const r = await kit.repos.listLanguages({ owner, repo: n });
+        repos.map(async (repo) => {
+          const r = await kit.repos.listLanguages({
+            owner: user.login,
+            repo: repo.name,
+          });
           return Object.keys(r.data);
         })
       )

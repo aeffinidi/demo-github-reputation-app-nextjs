@@ -6,8 +6,10 @@ import {
   SCHEMA_MANAGER_URL,
 } from "../../../helpers/schema-helpers";
 import { issuanceService } from "../../../services/issuance";
+import { Octokit } from "@octokit/rest";
+import { GithubRepo } from "../../../types/github";
 
-const SCHEMA_NAME = "DeveloperReputationV1-0";
+const SCHEMA_NAME = "DeveloperReputationV1-1";
 
 type AnyObject = Record<string, any>;
 
@@ -66,22 +68,48 @@ const handler = async (
     res.status(400).json({ error: "Invalid email input" });
   }
 
+  const kit = new Octokit({
+    auth: accessToken,
+  });
+
+  const userData = await kit.rest.users.getAuthenticated();
+  const user = userData.data;
+  const owner = user.login;
+  const reposData = await kit.repos.listForAuthenticatedUser();
+  const repos = reposData.data;
+  const languages = Array.from(
+    (
+      await Promise.all(
+        repos.map(async (repo: GithubRepo) => {
+          const r = await kit.repos.listLanguages({ owner, repo: repo.name });
+          return Object.keys(r.data);
+        })
+      )
+    )
+      .flat()
+      .reduce((acc, curr) => {
+        acc.add(curr);
+        return acc;
+      }, new Set<string>())
+  );
+
   try {
     const issuerDid = process.env.AFFINIDI_PROJECT_DID || "";
     const projectId = process.env.AFFINIDI_PROJECT_ID || "";
-    const { schemaType, jsonSchema, jsonLdContext } = parseSchemaURL(
-      `${SCHEMA_MANAGER_URL}/schemas/${SCHEMA_NAME}`
-    );
 
+    const walletUrl = `https://holder-reference-app.stg.affinidi.com/holder/claim`;
     const issuanceJson: CreateIssuanceInput = {
       template: {
+        walletUrl,
         verification: {
           method: VerificationMethod.Email,
         },
         schema: {
-          type: schemaType,
-          jsonLdContextUrl: jsonLdContext.toString(),
-          jsonSchemaUrl: jsonSchema.toString(),
+          type: "DeveloperReputationV1-2",
+          jsonLdContextUrl:
+            "https://schema.stg.affinidi.com/DeveloperReputationV1-2.jsonld",
+          jsonSchemaUrl:
+            "https://schema.stg.affinidi.com/DeveloperReputationV1-2.json",
         },
         issuerDid,
       },
@@ -89,9 +117,9 @@ const handler = async (
     };
 
     const credentialSubject = {
-      username: "Atsuhiro",
-      repos: ["repo-1", "repo-000", "bad-repo-1", "shitty-repo-3"],
-      languages: ["typescript", "javascript", "pipi-script"],
+      username: user.login,
+      repos: repos.map((repo) => repo.name).join(", "),
+      languages: languages.join(", "),
     };
 
     const offerInput: CreateIssuanceOfferInput = {
@@ -108,16 +136,11 @@ const handler = async (
       issuanceJson
     );
 
-    const offerDto = await issuanceService.createOffer(
-      apiKeyHash,
-      issuance.id,
-      offerInput
-    );
-
-    console.log("offerDto:", offerDto);
+    await issuanceService.createOffer(apiKeyHash, issuance.id, offerInput);
 
     res.status(201).json({});
   } catch (error) {
+    console.log("error:", error);
     res
       .status(400)
       .json({ error: "There was an error while trying to issue the VC" });

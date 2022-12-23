@@ -13,7 +13,7 @@ type GithubProps = GithubTokenResponse;
 const Github: FC<GithubProps> = (props) => {
   const { token } = props;
   const [storedToken] = useLocalStorage<string>("github_token", token);
-  const [user, setUser] = useState<GithubUser>();
+  const [user, setUser] = useState<GithubUser | null>(null);
   const [repos, setRepos] = useState(null);
   const [languages, setLanguages] = useState(null);
 
@@ -22,7 +22,9 @@ const Github: FC<GithubProps> = (props) => {
       `${process.env.NEXT_PUBLIC_HOST}/api/github/user?access_token=${storedToken}`
     );
     const user: GithubUser = await resp.json();
-    setUser(user);
+    setRepos(() => null);
+    setLanguages(() => null);
+    setUser(() => user);
   };
 
   const handleGetUserRepos = async () => {
@@ -30,6 +32,8 @@ const Github: FC<GithubProps> = (props) => {
       `${process.env.NEXT_PUBLIC_HOST}/api/github/repos?access_token=${storedToken}`
     );
     const data = await resp.json();
+    setUser(() => null);
+    setLanguages(() => null);
     setRepos(data.repos);
   };
   const handleGetUserReposLanguages = async () => {
@@ -37,6 +41,8 @@ const Github: FC<GithubProps> = (props) => {
       `${process.env.NEXT_PUBLIC_HOST}/api/github/reposLanguages?access_token=${storedToken}`
     );
     const data = await resp.json();
+    setRepos(() => null);
+    setUser(() => null);
     setLanguages(data.languages);
   };
 
