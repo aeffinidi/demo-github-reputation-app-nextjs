@@ -1,6 +1,7 @@
 import { Octokit } from "@octokit/rest";
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import GithubService from "../../../services/github";
 import { GithubReposLanguages } from "../../../types/github";
 
 type GithubReposLanguagesResponse = {
@@ -18,32 +19,8 @@ const handler = async (
     return;
   }
 
-  const kit = new Octokit({
-    auth,
-  });
-
-  const userData = await kit.rest.users.getAuthenticated();
-  const user = userData.data;
-  const reposData = await kit.repos.listForAuthenticatedUser();
-  const repos = reposData.data;
-
-  const languages = Array.from(
-    (
-      await Promise.all(
-        repos.map(async (repo) => {
-          const r = await kit.repos.listLanguages({
-            owner: user.login,
-            repo: repo.name,
-          });
-          return Object.keys(r.data);
-        })
-      )
-    )
-      .flat()
-      .reduce((acc, curr) => {
-        acc.add(curr);
-        return acc;
-      }, new Set<string>())
+  const languages = await GithubService.getUserProgrammingLanguages(
+    new Octokit({ auth })
   );
 
   res.status(200).json({ languages });

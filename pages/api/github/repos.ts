@@ -1,6 +1,7 @@
 import { Octokit } from "@octokit/rest";
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import GithubService from "../../../services/github";
 import { GithubRepo } from "../../../types/github";
 
 type GithubReposResponse = {
@@ -18,12 +19,9 @@ const handler = async (
     return;
   }
 
-  const kit = new Octokit({
-    auth,
-  });
+  const repos = await GithubService.getUserRepos(new Octokit({ auth }));
 
-  const resp = await kit.repos.listForAuthenticatedUser();
-  res.status(200).json({ repos: resp.data });
+  res.status(200).json({ repos });
 };
 
 export default handler;

@@ -1,6 +1,7 @@
 import { Octokit } from "@octokit/rest";
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import GithubService from "../../../services/github";
 import { GithubUser } from "../../../types/github";
 
 type Data = {
@@ -15,17 +16,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
     return;
   }
 
-  if (auth.indexOf("Bearer") === -1) {
-    auth = `Bearer ${auth}`;
-  }
-
-  const resp = await fetch("https://api.github.com/user", {
-    method: "GET",
-    headers: {
-      Authorization: auth,
-    },
-  });
-  const user: GithubUser = await resp.json();
+  const user = await GithubService.getUserData(new Octokit({ auth }));
 
   res.json({ user });
 };
